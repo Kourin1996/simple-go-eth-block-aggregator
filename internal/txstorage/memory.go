@@ -29,17 +29,3 @@ func (s *InMemoryTransactionStorage) GetTransactionsByAddress(
 	panic("not implemented!")
 	return nil, nil
 }
-
-func (s *InMemoryTransactionStorage) QueryOutboundTransactions(
-	target types.Address,
-) ([]types.Transaction, error) {
-	panic("not implemented!")
-
-	return nil, nil
-}
-
-func (s *InMemoryTransactionStorage) QueryInboundTransactions() ([]types.Transaction, error) {
-	panic("not implemented!")
-
-	return nil, nil
-}

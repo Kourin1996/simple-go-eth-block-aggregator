@@ -1,4 +1,4 @@
-package aggregator
+package parser
 
 import (
 	"Kourin1996/simple-go-eth-block-aggregator/internal/types"
@@ -12,4 +12,5 @@ type EthClient interface {
 
 type EthTransactionStorage interface {
 	InsertTransactions([]types.Transaction) error
+	GetTransactionsByAddress(string) ([]types.Transaction, error)
 }

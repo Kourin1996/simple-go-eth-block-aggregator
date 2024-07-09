@@ -1,6 +1,8 @@
 package server
 
-import "context"
+import (
+	"context"
+)
 
 type EthTransactionsServer struct {
 	storage TransactionStorage

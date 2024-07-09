@@ -1,10 +1,10 @@
 package main
 
 import (
-	"Kourin1996/simple-go-eth-block-aggregator/internal/aggregator"
 	"Kourin1996/simple-go-eth-block-aggregator/internal/jsonrpc"
 	"Kourin1996/simple-go-eth-block-aggregator/internal/server"
 	"Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
+	"Kourin1996/simple-go-eth-block-aggregator/pkg/parser"
 	"context"
 	"errors"
 	"fmt"
@@ -37,15 +37,15 @@ func main() {
 	ethClient := jsonrpc.New(client, envs.JsonRpcUrl)
 	store := txstorage.New()
 
-	agg := aggregator.New(ethClient, store)
+	prs := parser.New(ethClient, store)
 	srv := server.New(store)
 
-	go agg.Start(envs.BeginningHeight)
+	go prs.Start(envs.BeginningHeight)
 	go srv.Start(envs.ApiPort)
 
 	waitForTerminationSignal()
 
-	if err := terminateServices([]Stoppable{agg, srv}); err != nil {
+	if err := terminateServices([]Stoppable{prs, srv}); err != nil {
 		log.Fatalf("some services failed to stop by timeout, err=%+v", err)
 	}
 

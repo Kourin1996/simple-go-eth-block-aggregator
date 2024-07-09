@@ -1,17 +1,25 @@
 package server
 
-import "Kourin1996/simple-go-eth-block-aggregator/internal/types"
+import "context"
 
-type EthTransactionsServer struct {}
-
-type TransactionStorage interface {
-	GetTransactions(types.Address) ([]types.Transaction, error)
+type EthTransactionsServer struct {
+	storage TransactionStorage
 }
 
-func NewServer() *EthTransactionsServer {
-	return &EthTransactionsServer{}
+func New(
+	storage TransactionStorage,
+) *EthTransactionsServer {
+	return &EthTransactionsServer{
+		storage: storage,
+	}
 }
 
-func (s *EthTransactionsServer) Start() error {
+func (s *EthTransactionsServer) Start(port int) error {
+	panic("not implemented")
+	return nil
+}
+
+func (s *EthTransactionsServer) Stop(ctx context.Context) error {
+	panic("not implemented")
 	return nil
 }

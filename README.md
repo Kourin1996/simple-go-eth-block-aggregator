@@ -27,4 +27,3 @@ $ go run ./cmd/*
 ├── go.sum
 └── README.md
 ```
-

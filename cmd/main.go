@@ -1,9 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"Kourin1996/simple-go-eth-block-aggregator/internal/server"
+	"log"
 )
 
 func main() {
-	fmt.Printf("Hello!\n")
+	s := server.NewServer()
+	if err := s.Start(); err != nil {
+		log.Fatalf("stopped server with error: %+v", err)
+	}
+
+	log.Printf("server stopped successfully, bye")
 }

@@ -7,20 +7,22 @@ import (
 	"Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
 )
 
 const (
-	EnvKeyApiPort          = "API_PORT"
-	EnvKeyBeginningHeights = "BEGINNING_HEIGHTS"
-	EnvKeyJsonRpcUrl       = "JSON_RPC_URL"
+	EnvKeyApiPort         = "API_PORT"
+	EnvKeyBeginningHeight = "BEGINNING_HEIGHT"
+	EnvKeyJsonRpcUrl      = "JSON_RPC_URL"
 
 	DefaultApiPort = 8000
 )
@@ -57,9 +59,42 @@ type Env struct {
 }
 
 func readEnvs() (*Env, error) {
-	panic("not implemented!")
+	var (
+		port            = DefaultApiPort
+		beginningHeight *big.Int
+		jsonRpcUrl      = ""
+	)
 
-	return &Env{}, nil
+	rawPort := os.Getenv(EnvKeyApiPort)
+	if rawPort != "" {
+		parsed, err := strconv.Atoi(rawPort)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse %s: %w", EnvKeyApiPort, err)
+		}
+
+		port = parsed
+	}
+
+	rawBeginningHeight := os.Getenv(EnvKeyBeginningHeight)
+	if rawBeginningHeight != "" {
+		height, ok := (&big.Int{}).SetString(rawBeginningHeight, 0)
+		if !ok {
+			return nil, fmt.Errorf("failed to parse %s", EnvKeyBeginningHeight)
+		}
+
+		beginningHeight = height
+	}
+
+	jsonRpcUrl = os.Getenv(EnvKeyJsonRpcUrl)
+	if jsonRpcUrl == "" {
+		return nil, fmt.Errorf("%s is required", EnvKeyJsonRpcUrl)
+	}
+
+	return &Env{
+		ApiPort:         port,
+		BeginningHeight: beginningHeight,
+		JsonRpcUrl:      jsonRpcUrl,
+	}, nil
 }
 
 func waitForTerminationSignal() {

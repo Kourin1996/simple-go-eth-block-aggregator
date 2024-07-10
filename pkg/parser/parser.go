@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"log"
 	"math"
 	"math/big"
@@ -12,6 +11,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 )
 
 const (

@@ -1,6 +1,8 @@
 package server
 
-import "github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
+import (
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
+)
 
 // PostSubscribeRequest is a request body for POST /subscribe API
 type PostSubscribeRequest struct {

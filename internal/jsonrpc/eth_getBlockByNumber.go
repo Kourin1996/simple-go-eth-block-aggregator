@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"math/big"
+
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 )
 
 // GetBlockByNumber queries eth_getBlockByNumber request to JSON-RPC server

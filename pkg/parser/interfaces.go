@@ -2,8 +2,9 @@ package parser
 
 import (
 	"context"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"math/big"
+
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 )
 
 type EthClient interface {

@@ -1,9 +1,10 @@
 package txstorage
 
 import (
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"strings"
 	"sync"
+
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 )
 
 type InMemoryTransactionStorage struct {

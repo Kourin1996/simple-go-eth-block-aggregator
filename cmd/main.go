@@ -4,10 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/jsonrpc"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/server"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/pkg/parser"
 	"log"
 	"math/big"
 	"net/http"
@@ -17,6 +13,11 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/jsonrpc"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/server"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/pkg/parser"
 )
 
 const (

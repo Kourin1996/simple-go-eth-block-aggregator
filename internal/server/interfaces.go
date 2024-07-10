@@ -5,5 +5,5 @@ import (
 )
 
 type TransactionStorage interface {
-	GetTransactionsByAddress(address types.Address) []types.Transaction
+	GetTransactionsByAddress(address types.Address) []*types.Transaction
 }

@@ -13,5 +13,5 @@ type EthClient interface {
 
 type EthTransactionStorage interface {
 	InsertTransactions([]*types.Transaction) error
-	GetTransactionsByAddress(string) []types.Transaction
+	GetTransactionsByAddress(string) []*types.Transaction
 }

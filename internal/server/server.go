@@ -8,9 +8,7 @@ type EthTransactionsServer struct {
 	storage TransactionStorage
 }
 
-func New(
-	storage TransactionStorage,
-) *EthTransactionsServer {
+func New(storage TransactionStorage) *EthTransactionsServer {
 	return &EthTransactionsServer{
 		storage: storage,
 	}

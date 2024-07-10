@@ -8,6 +8,7 @@ type Block struct {
 }
 
 type Transaction struct {
+	Hash string
 	From string
 	To   string
 }

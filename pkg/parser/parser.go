@@ -73,7 +73,14 @@ func (p *Parser) Subscribe(address string) bool {
 
 // GetTransactions returns list of inbound or outbound transactions for an address
 func (p *Parser) GetTransactions(address string) []types.Transaction {
-	return p.storage.GetTransactionsByAddress(address)
+	txRefs := p.storage.GetTransactionsByAddress(address)
+
+	txs := make([]types.Transaction, len(txRefs))
+	for idx, txRef := range txRefs {
+		txs[idx] = *txRef
+	}
+
+	return txs
 }
 
 // Start prepares required parameters and start background jobs

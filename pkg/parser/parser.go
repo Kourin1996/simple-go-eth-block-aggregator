@@ -6,17 +6,19 @@ import (
 	"fmt"
 	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"log"
+	"math"
 	"math/big"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 )
 
 const (
-	MaxRetry                        = 5
+	MaxRetry                        = 10
 	DefaultFetchTimeout             = 10 * time.Second
-	DefaultSleepTimeForNextAttempt  = 1 * time.Second
-	DefaultNextBlockPollingInterval = 15 * time.Second
+	DefaultBackoffTime              = 1 * time.Second
+	DefaultNextBlockPollingInterval = 10 * time.Second
 )
 
 type Parser struct {
@@ -66,6 +68,8 @@ func (p *Parser) GetCurrentBlock() int {
 
 // Subscribe adds address to observer
 func (p *Parser) Subscribe(address string) bool {
+	address = strings.ToLower(address)
+
 	_, subscribed := p.addressMap.LoadOrStore(address, true)
 
 	return !subscribed
@@ -86,6 +90,8 @@ func (p *Parser) Start(beginningHeight *big.Int) error {
 
 		beginningHeight = height
 	}
+
+	log.Printf("start fetching blocks from %d", beginningHeight.Uint64())
 
 	go p.runScrapingProcess(*beginningHeight)
 	go p.runStoringProcess()
@@ -117,6 +123,9 @@ func (p *Parser) runScrapingProcess(beginningHeight big.Int) {
 	}()
 
 	for {
+		// TODO: remove
+		time.Sleep(time.Millisecond * 500)
+
 		// fetch block
 		block, err := p.fetchBlock(*current)
 		if errors.Is(err, context.Canceled) {
@@ -131,7 +140,7 @@ func (p *Parser) runScrapingProcess(beginningHeight big.Int) {
 
 		// next block is not created yet, wait certain time and retry
 		if block == nil {
-			log.Printf("next block is not created yet, retry in %f seconds...", DefaultNextBlockPollingInterval.Seconds())
+			log.Printf("next block is not created yet, retry in %d seconds...", uint(DefaultNextBlockPollingInterval.Seconds()))
 
 			select {
 			case <-time.After(DefaultNextBlockPollingInterval):
@@ -141,6 +150,8 @@ func (p *Parser) runScrapingProcess(beginningHeight big.Int) {
 				return
 			}
 		}
+
+		log.Printf("fetched new block, height=%d", current.Uint64())
 
 		select {
 		case <-p.notifyCloseCh:
@@ -185,6 +196,8 @@ func (p *Parser) runStoringProcess() {
 			log.Printf("failed to store current block height: %v", err)
 			p.notifyErrCh <- err
 		}
+
+		log.Printf("saved transactions in block, block height=%d", p.currentBlockHeight.Load())
 	}
 }
 
@@ -217,6 +230,7 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 			return block, nil
 		}
 
+		// error handling
 		// cancelled by outside, exit function
 		if errors.Is(err, context.Canceled) {
 			return nil, err
@@ -228,8 +242,14 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 			return nil, fmt.Errorf("failed to acquire block after %d attempts: %w", MaxRetry, err)
 		}
 
+		// exponential backoff
+		multiplier := math.Pow(2, float64(retryTime-1))
+		delay := time.Duration(multiplier) * DefaultBackoffTime
+
+		log.Printf("failed to fetch block, retry in %d seconds", uint(delay.Seconds()))
+
 		select {
-		case <-time.After(DefaultSleepTimeForNextAttempt):
+		case <-time.After(delay):
 		case <-p.notifyCloseCh:
 			return nil, nil
 		}
@@ -243,7 +263,7 @@ func (p *Parser) isSubscribingTo(address string) bool {
 }
 
 func (p *Parser) updateCurrentHeight(blockHeightHex string) error {
-	height, ok := (&big.Int{}).SetString(blockHeightHex, 16)
+	height, ok := (&big.Int{}).SetString(blockHeightHex, 0)
 	if !ok {
 		return fmt.Errorf("failed to parse block height, %s", blockHeightHex)
 	}

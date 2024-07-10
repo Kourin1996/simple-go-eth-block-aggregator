@@ -24,7 +24,7 @@ const (
 	EnvKeyBeginningHeight = "BEGINNING_HEIGHT"
 	EnvKeyJsonRpcUrl      = "JSON_RPC_URL"
 
-	DefaultApiPort = 8000
+	DefaultApiPort uint = 8000
 )
 
 func main() {
@@ -40,29 +40,28 @@ func main() {
 
 	store := txstorage.New()
 	prs := parser.New(ethClient, store)
-	srv := server.New(store)
+	srv := server.New(prs, envs.ApiPort)
 
 	// start services
 	if err := prs.Start(envs.BeginningHeight); err != nil {
 		log.Fatalf("failed to start parser: %v", err)
 	}
-	if err := srv.Start(envs.ApiPort); err != nil {
-		log.Fatalf("failed to start web server: %v", err)
-	}
+
+	srv.Start()
 
 	// wait until error occurs or terminate signal is sent
-	waitForErrorOrTerminateSignal(prs)
+	waitForErrorOrTerminateSignal(prs, srv)
 
 	// terminate services
 	if err := terminateServices([]Stoppable{prs, srv}); err != nil {
 		log.Fatalf("some services failed to stop by timeout, err=%+v", err)
 	}
 
-	log.Printf("server stopped successfully, bye")
+	log.Printf("all servicesc has stopped successfully, bye")
 }
 
 type Env struct {
-	ApiPort         int
+	ApiPort         uint
 	BeginningHeight *big.Int
 	JsonRpcUrl      string
 }
@@ -76,12 +75,12 @@ func readEnvs() (*Env, error) {
 
 	rawPort := os.Getenv(EnvKeyApiPort)
 	if rawPort != "" {
-		parsed, err := strconv.Atoi(rawPort)
+		parsed, err := strconv.ParseUint(rawPort, 10, 16)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse %s: %w", EnvKeyApiPort, err)
 		}
 
-		port = parsed
+		port = uint(parsed)
 	}
 
 	rawBeginningHeight := os.Getenv(EnvKeyBeginningHeight)
@@ -108,15 +107,20 @@ func readEnvs() (*Env, error) {
 
 func waitForErrorOrTerminateSignal(
 	p *parser.Parser,
-) error {
+	s *server.EthTransactionsServer,
+) {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
+	log.Printf("awaiting signals")
+
 	select {
 	case err := <-p.ErrCh():
-		return err
+		log.Printf("parser was terminated with error: %v", err)
+	case err := <-s.ErrCh():
+		log.Printf("server was terminated with error: %v", err)
 	case <-signalCh:
-		return nil
+		log.Printf("termination signal was sent")
 	}
 }
 
@@ -125,6 +129,8 @@ type Stoppable interface {
 }
 
 func terminateServices(services []Stoppable) error {
+	log.Printf("terminating services...")
+
 	num := len(services)
 
 	var wg sync.WaitGroup
@@ -144,6 +150,7 @@ func terminateServices(services []Stoppable) error {
 	}
 
 	wg.Wait()
+	close(errCh)
 
 	errs := make([]error, 0, num)
 	for err := range errCh {

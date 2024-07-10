@@ -14,9 +14,13 @@ func (c *EthJsonRpcClient) GetBlockNumber(ctx context.Context) (*big.Int, error)
 		return nil, err
 	}
 
+	if res.Error != nil {
+		return nil, fmt.Errorf("JSON RPC server returned an error, code=%d, message=%s", res.Error.Code, res.Error.Message)
+	}
+
 	var hexHeight string
-	if err := json.Unmarshal(res, &hexHeight); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal json, %s: %w", string(res), err)
+	if err := json.Unmarshal(res.Result, &hexHeight); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal json, %s: %w", string(res.Result), err)
 	}
 
 	height, ok := (&big.Int{}).SetString(hexHeight, 0)

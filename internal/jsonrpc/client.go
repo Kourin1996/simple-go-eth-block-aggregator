@@ -20,7 +20,7 @@ func New(client *http.Client, jsonRpcUrl string) *EthJsonRpcClient {
 	}
 }
 
-func (c *EthJsonRpcClient) call(ctx context.Context, request *JsonRpcRequest) (json.RawMessage, error) {
+func (c *EthJsonRpcClient) call(ctx context.Context, request *JsonRpcRequest) (*JsonRpcResponse, error) {
 	// serialize request to JSON
 	reqBody, err := json.Marshal(request)
 	if err != nil {
@@ -53,10 +53,5 @@ func (c *EthJsonRpcClient) call(ctx context.Context, request *JsonRpcRequest) (j
 		return nil, fmt.Errorf("failed to parse JSON RPC response: %w", err)
 	}
 
-	// return error if the response contains an error
-	if result.Error != nil {
-		return nil, fmt.Errorf("rpc server retunred error, code=%d, message=%s", result.Error.Code, result.Error.Message)
-	}
-
-	return result.Result, nil
+	return result, nil
 }

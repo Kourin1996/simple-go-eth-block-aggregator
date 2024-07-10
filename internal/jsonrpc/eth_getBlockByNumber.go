@@ -22,9 +22,17 @@ func (c *EthJsonRpcClient) GetBlockByNumber(
 		return nil, err
 	}
 
+	if res.Error != nil {
+		if res.Error.Message == "Resource not found." {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("JSON RPC server returned an error, code=%d, message=%s", res.Error.Code, res.Error.Message)
+	}
+
 	block := &types.Block{}
-	if err := json.Unmarshal(res, block); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal json, %s: %w", string(res), err)
+	if err := json.Unmarshal(res.Result, block); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal json, %s: %w", string(res.Result), err)
 	}
 
 	return block, nil

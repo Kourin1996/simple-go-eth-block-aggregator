@@ -21,6 +21,11 @@ run:
 	@echo "Running..."
 	@go run $(MAIN_SRC)
 
+.PHONY: fmt
+fmt:
+	@echo "Formatting..."
+	@go fmt ./...
+
 .PHONY: help
 help:
 	@echo "Usage:"

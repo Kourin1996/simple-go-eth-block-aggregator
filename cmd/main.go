@@ -37,6 +37,7 @@ func main() {
 	// create modules
 	client := &http.Client{}
 	ethClient := jsonrpc.New(client, envs.JsonRpcUrl)
+
 	store := txstorage.New()
 	prs := parser.New(ethClient, store)
 	srv := server.New(store)

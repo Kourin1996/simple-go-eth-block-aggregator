@@ -33,7 +33,7 @@ func (s *InMemoryTransactionStorage) InsertTransactions(txs []*types.Transaction
 }
 
 // GetTransactionsByAddress returns list of transactions associated with given address
-func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target types.Address) []types.Transaction {
+func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target string) []types.Transaction {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 

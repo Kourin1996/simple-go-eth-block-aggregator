@@ -167,10 +167,10 @@ func (p *Parser) runStoringProcess() {
 		}
 
 		// filter transactions by address
-		filtered := make([]*types.Transaction, 0, len(block.Txs))
-		for _, tx := range block.Txs {
+		filtered := make([]*types.Transaction, 0, len(block.Transactions))
+		for _, tx := range block.Transactions {
 			if p.isSubscribingTo(tx.From) || p.isSubscribingTo(tx.To) {
-				filtered = append(filtered, tx)
+				filtered = append(filtered, &tx)
 			}
 		}
 
@@ -181,7 +181,7 @@ func (p *Parser) runStoringProcess() {
 		}
 
 		// update current height
-		if err := p.updateCurrentHeight(block.Height); err != nil {
+		if err := p.updateCurrentHeight(block.Number); err != nil {
 			log.Printf("failed to store current block height: %v", err)
 			p.notifyErrCh <- err
 		}
@@ -192,7 +192,7 @@ func (p *Parser) fetchLatestHeight() (*big.Int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultFetchTimeout)
 	defer cancel()
 
-	res, err := p.ethClient.GetLatestHeight(ctx)
+	res, err := p.ethClient.GetBlockNumber(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch latest block height: %w", err)
 	}
@@ -212,7 +212,7 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 	for {
 		ctx, _ := context.WithTimeout(ctx, DefaultFetchTimeout)
 
-		block, err := p.ethClient.GetBlock(ctx, height)
+		block, err := p.ethClient.GetBlockByNumber(ctx, height, true)
 		if err == nil {
 			return block, nil
 		}

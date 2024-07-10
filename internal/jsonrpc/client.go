@@ -1,9 +1,10 @@
 package jsonrpc
 
 import (
+	"bytes"
 	"context"
-	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
-	"math/big"
+	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -19,12 +20,43 @@ func New(client *http.Client, jsonRpcUrl string) *EthJsonRpcClient {
 	}
 }
 
-func (c *EthJsonRpcClient) GetLatestHeight(ctx context.Context) (*big.Int, error) {
-	panic("not implemented")
-	return nil, nil
-}
+func (c *EthJsonRpcClient) call(ctx context.Context, request *JsonRpcRequest) (json.RawMessage, error) {
+	// serialize request to JSON
+	reqBody, err := json.Marshal(request)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize JSON RPC request: %w", err)
+	}
 
-func (c *EthJsonRpcClient) GetBlock(ctx context.Context, height big.Int) (*types.Block, error) {
-	panic("not implemented")
-	return nil, nil
+	// build request
+	req, err := http.NewRequest("POST", c.jsonRpcUrl, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new JSON RPC request: %w", err)
+	}
+
+	// send request
+	req = req.WithContext(ctx)
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call JSON RPC: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	// server should return Ok
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("rpc server returns not 200 status: %d", resp.StatusCode)
+	}
+
+	// parse response json
+	result := &JsonRpcResponse{}
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON RPC response: %w", err)
+	}
+
+	// return error if the response contains an error
+	if result.Error != nil {
+		return nil, fmt.Errorf("rpc server retunred error, code=%d, message=%s", result.Error.Code, result.Error.Message)
+	}
+
+	return result.Result, nil
 }

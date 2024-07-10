@@ -7,8 +7,8 @@ import (
 )
 
 type EthClient interface {
-	GetLatestHeight(ctx context.Context) (*big.Int, error)
-	GetBlock(context.Context, big.Int) (*types.Block, error)
+	GetBlockNumber(ctx context.Context) (*big.Int, error)
+	GetBlockByNumber(context.Context, big.Int, bool) (*types.Block, error)
 }
 
 type EthTransactionStorage interface {

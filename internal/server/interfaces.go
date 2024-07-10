@@ -1,7 +1,7 @@
 package server
 
 import (
-	"Kourin1996/simple-go-eth-block-aggregator/internal/types"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 )
 
 type TransactionStorage interface {

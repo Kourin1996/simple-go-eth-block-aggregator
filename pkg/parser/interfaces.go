@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"context"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
 	"math/big"
 )
 

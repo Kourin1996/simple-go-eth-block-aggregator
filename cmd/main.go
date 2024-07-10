@@ -1,13 +1,13 @@
 package main
 
 import (
-	"Kourin1996/simple-go-eth-block-aggregator/internal/jsonrpc"
-	"Kourin1996/simple-go-eth-block-aggregator/internal/server"
-	"Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
-	"Kourin1996/simple-go-eth-block-aggregator/pkg/parser"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/jsonrpc"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/server"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/txstorage"
+	"github.com/Kourin1996/simple-go-eth-block-aggregator/pkg/parser"
 	"log"
 	"math/big"
 	"net/http"
@@ -49,8 +49,8 @@ func main() {
 		log.Fatalf("failed to start web server: %v", err)
 	}
 
-	// sleep until Ctrl + C is pressed
-	waitForTerminationSignal()
+	// wait until error occurs or terminate signal is sent
+	waitForErrorOrTerminateSignal(prs)
 
 	// terminate services
 	if err := terminateServices([]Stoppable{prs, srv}); err != nil {
@@ -105,10 +105,18 @@ func readEnvs() (*Env, error) {
 	}, nil
 }
 
-func waitForTerminationSignal() {
+func waitForErrorOrTerminateSignal(
+	p *parser.Parser,
+) error {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
-	<-signalCh
+
+	select {
+	case err := <-p.ErrCh():
+		return err
+	case <-signalCh:
+		return nil
+	}
 }
 
 type Stoppable interface {

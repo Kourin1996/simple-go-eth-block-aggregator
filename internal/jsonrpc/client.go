@@ -2,6 +2,7 @@ package jsonrpc
 
 import (
 	"Kourin1996/simple-go-eth-block-aggregator/internal/types"
+	"context"
 	"math/big"
 	"net/http"
 )
@@ -18,12 +19,12 @@ func New(client *http.Client, jsonRpcUrl string) *EthJsonRpcClient {
 	}
 }
 
-func (c *EthJsonRpcClient) GetLatestHeight() (*big.Int, error) {
+func (c *EthJsonRpcClient) GetLatestHeight(ctx context.Context) (*big.Int, error) {
 	panic("not implemented")
 	return nil, nil
 }
 
-func (c *EthJsonRpcClient) GetBlocks(from big.Int, to *big.Int) ([]types.Block, error) {
+func (c *EthJsonRpcClient) GetBlocks(ctx context.Context, height *big.Int) (*types.Block, error) {
 	panic("not implemented")
 	return nil, nil
 }

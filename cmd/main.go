@@ -28,23 +28,31 @@ const (
 )
 
 func main() {
+	// read environment variables
 	envs, err := readEnvs()
 	if err != nil {
 		log.Fatalf("failed to read some envs: %+v", err)
 	}
 
+	// create modules
 	client := &http.Client{}
 	ethClient := jsonrpc.New(client, envs.JsonRpcUrl)
 	store := txstorage.New()
-
 	prs := parser.New(ethClient, store)
 	srv := server.New(store)
 
-	go prs.Start(envs.BeginningHeight)
-	go srv.Start(envs.ApiPort)
+	// start services
+	if err := prs.Start(envs.BeginningHeight); err != nil {
+		log.Fatalf("failed to start parser: %v", err)
+	}
+	if err := srv.Start(envs.ApiPort); err != nil {
+		log.Fatalf("failed to start web server: %v", err)
+	}
 
+	// sleep until Ctrl + C is pressed
 	waitForTerminationSignal()
 
+	// terminate services
 	if err := terminateServices([]Stoppable{prs, srv}); err != nil {
 		log.Fatalf("some services failed to stop by timeout, err=%+v", err)
 	}

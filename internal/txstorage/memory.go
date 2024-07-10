@@ -15,7 +15,7 @@ func New() *InMemoryTransactionStorage {
 // Outgoing transactions address -> hash list
 
 func (s *InMemoryTransactionStorage) InsertTransactions(
-	txs []types.Transaction,
+	txs []*types.Transaction,
 ) error {
 	// 1. sort by block height, index ???
 	// 2. save
@@ -25,7 +25,7 @@ func (s *InMemoryTransactionStorage) InsertTransactions(
 
 func (s *InMemoryTransactionStorage) GetTransactionsByAddress(
 	target types.Address,
-) ([]types.Transaction, error) {
+) []types.Transaction {
 	panic("not implemented!")
-	return nil, nil
+	return nil
 }

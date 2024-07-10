@@ -7,6 +7,7 @@ import (
 	"math/big"
 )
 
+// GetBlockNumber queries eth_blockNumber request to JSON-RPC server
 func (c *EthJsonRpcClient) GetBlockNumber(ctx context.Context) (*big.Int, error) {
 	req := NewJsonRpcRequest(MethodEthBlockNumber, nil)
 	res, err := c.call(ctx, req)

@@ -36,20 +36,23 @@ func (s *EthTransactionsServer) Start() {
 	go func() {
 		log.Printf("starting web server, address=%s", s.Server.Addr)
 		if err := s.Server.ListenAndServe(); err != http.ErrServerClosed {
-			// unexpected error. port in use?
-			log.Fatalf("ListenAndServe(): %v", err)
+			// maybe reach here in case that port is used by other application
+			s.ErrorCh <- err
 		}
 	}()
 }
 
+// Stop closes server
 func (s *EthTransactionsServer) Stop(ctx context.Context) error {
 	return s.Server.Shutdown(ctx)
 }
 
+// ErrCh returns channel of error which is sent from
 func (s *EthTransactionsServer) ErrCh() <-chan error {
 	return s.ErrorCh
 }
 
+// handleGetCurrentBlock is a handler for GET /current
 func (s *EthTransactionsServer) handleGetCurrentBlock(w http.ResponseWriter, r *http.Request) {
 	// validate request
 	if r.Method != http.MethodGet {
@@ -66,6 +69,7 @@ func (s *EthTransactionsServer) handleGetCurrentBlock(w http.ResponseWriter, r *
 	s.writeResponse(w, &height)
 }
 
+// handlePostSubscribe is a handler for POST /subscribe
 func (s *EthTransactionsServer) handlePostSubscribe(w http.ResponseWriter, r *http.Request) {
 	// validate request
 	if r.Method != http.MethodPost {
@@ -97,6 +101,7 @@ func (s *EthTransactionsServer) handlePostSubscribe(w http.ResponseWriter, r *ht
 	})
 }
 
+// handlePostGetTransactions is a handler for POST /transactions
 func (s *EthTransactionsServer) handlePostGetTransactions(w http.ResponseWriter, r *http.Request) {
 	// validate request
 	if r.Method != http.MethodPost {
@@ -128,6 +133,7 @@ func (s *EthTransactionsServer) handlePostGetTransactions(w http.ResponseWriter,
 	})
 }
 
+// readRequestBody is a helper function to read request body and map to given body object
 func (s *EthTransactionsServer) readRequestBody(
 	r *http.Request,
 	body interface{},
@@ -140,6 +146,7 @@ func (s *EthTransactionsServer) readRequestBody(
 	return nil
 }
 
+// writeResponse is a helper function to write given data as a response body in json format
 func (s *EthTransactionsServer) writeResponse(
 	w http.ResponseWriter,
 	response interface{},
@@ -152,6 +159,7 @@ func (s *EthTransactionsServer) writeResponse(
 	}
 }
 
+// validateAddress checks that given address is correct format in Ethereum
 func validateAddress(address string) error {
 	if len(address) != 42 {
 		return errors.New("given address is not 20 bytes hex")
@@ -162,6 +170,7 @@ func validateAddress(address string) error {
 	return nil
 }
 
+// isHex is a helper function to validate hex string
 func isHex(s string) bool {
 	hexPattern := `^0x[0-9a-fA-F]+$`
 	matched, err := regexp.MatchString(hexPattern, s)

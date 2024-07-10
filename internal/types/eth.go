@@ -1,5 +1,6 @@
 package types
 
+// Block is Ethereum Block Structure (same as JSON-RPC schema)
 type Block struct {
 	BaseFeePerGas         string        `json:"baseFeePerGas"`
 	BlobGasUsed           string        `json:"blobGasUsed"`
@@ -36,6 +37,7 @@ type Withdrawal struct {
 	Amount         string `json:"amount"`
 }
 
+// Transaction is Ethereum Transaction Structure (same as JSON-RPC schema)
 type Transaction struct {
 	BlockHash            string              `json:"blockHash"`
 	BlockNumber          string              `json:"blockNumber"`

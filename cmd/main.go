@@ -66,6 +66,7 @@ type Env struct {
 	JsonRpcUrl      string
 }
 
+// readEnvs reads environment variables, parses, and returns Env
 func readEnvs() (*Env, error) {
 	var (
 		port            = DefaultApiPort
@@ -73,6 +74,7 @@ func readEnvs() (*Env, error) {
 		jsonRpcUrl      = ""
 	)
 
+	// API port
 	rawPort := os.Getenv(EnvKeyApiPort)
 	if rawPort != "" {
 		parsed, err := strconv.ParseUint(rawPort, 10, 16)
@@ -83,6 +85,7 @@ func readEnvs() (*Env, error) {
 		port = uint(parsed)
 	}
 
+	// beginning height for block fetching
 	rawBeginningHeight := os.Getenv(EnvKeyBeginningHeight)
 	if rawBeginningHeight != "" {
 		height, ok := (&big.Int{}).SetString(rawBeginningHeight, 0)
@@ -93,6 +96,7 @@ func readEnvs() (*Env, error) {
 		beginningHeight = height
 	}
 
+	// JSON RPC url
 	jsonRpcUrl = os.Getenv(EnvKeyJsonRpcUrl)
 	if jsonRpcUrl == "" {
 		return nil, fmt.Errorf("%s is required", EnvKeyJsonRpcUrl)
@@ -105,6 +109,7 @@ func readEnvs() (*Env, error) {
 	}, nil
 }
 
+// waitForErrorOrTerminateSignal waits for SIGINT (Ctrl + c), or errors from services running as a background task
 func waitForErrorOrTerminateSignal(
 	p *parser.Parser,
 	s *server.EthTransactionsServer,
@@ -112,7 +117,7 @@ func waitForErrorOrTerminateSignal(
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
-	log.Printf("awaiting signals")
+	log.Printf("awaiting termination signals")
 
 	select {
 	case err := <-p.ErrCh():
@@ -128,6 +133,8 @@ type Stoppable interface {
 	Stop(context.Context) error
 }
 
+// terminateServices calls Stop method of each service
+// and wait for them to shutdown gracefully
 func terminateServices(services []Stoppable) error {
 	log.Printf("terminating services...")
 

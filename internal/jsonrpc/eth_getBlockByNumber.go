@@ -8,6 +8,9 @@ import (
 	"math/big"
 )
 
+// GetBlockByNumber queries eth_getBlockByNumber request to JSON-RPC server
+// If a target block is not mined, this method returns error
+// Otherwise, this method returns a block or error
 func (c *EthJsonRpcClient) GetBlockByNumber(
 	ctx context.Context,
 	height big.Int,

@@ -123,9 +123,6 @@ func (p *Parser) runScrapingProcess(beginningHeight big.Int) {
 	}()
 
 	for {
-		// TODO: remove
-		time.Sleep(time.Millisecond * 500)
-
 		// fetch block
 		block, err := p.fetchBlock(*current)
 		if errors.Is(err, context.Canceled) {
@@ -166,6 +163,7 @@ func (p *Parser) runScrapingProcess(beginningHeight big.Int) {
 	}
 }
 
+// runStoringProcess process fetched block and save transactions to storage
 func (p *Parser) runStoringProcess() {
 	for {
 		// wait for new incoming block
@@ -204,6 +202,7 @@ func (p *Parser) runStoringProcess() {
 	}
 }
 
+// fetchLatestHeight is a wrapper function to fetch latest block height by client
 func (p *Parser) fetchLatestHeight() (*big.Int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultFetchTimeout)
 	defer cancel()
@@ -216,6 +215,8 @@ func (p *Parser) fetchLatestHeight() (*big.Int, error) {
 	return res, nil
 }
 
+// fetchBlock fetches a block by given height with retry and backoff mechanisms
+// It keeps attempting until it either succeeds, exceeds the maximum number of retries, or is cancelled
 func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -259,12 +260,15 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 	}
 }
 
+// isSubscribingTo is a helper function to read given address from map
 func (p *Parser) isSubscribingTo(address string) bool {
+	// just check the target address is stored or not
 	_, existing := p.addressMap.Load(strings.ToLower(address))
 
 	return existing
 }
 
+// updateCurrentHeight updates current maximum fetched block height
 func (p *Parser) updateCurrentHeight(blockHeightHex string) error {
 	height, ok := (&big.Int{}).SetString(blockHeightHex, 0)
 	if !ok {

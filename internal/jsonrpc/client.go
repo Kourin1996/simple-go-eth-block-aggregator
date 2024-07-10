@@ -20,6 +20,7 @@ func New(client *http.Client, jsonRpcUrl string) *EthJsonRpcClient {
 	}
 }
 
+// call sends JSON-RPC request to server and returns response
 func (c *EthJsonRpcClient) call(ctx context.Context, request *JsonRpcRequest) (*JsonRpcResponse, error) {
 	// serialize request to JSON
 	reqBody, err := json.Marshal(request)

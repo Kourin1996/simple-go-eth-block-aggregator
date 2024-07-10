@@ -20,6 +20,7 @@ func New() *InMemoryTransactionStorage {
 	}
 }
 
+// InsertTransactions stores given transactions and associate from and to account with its transaction
 func (s *InMemoryTransactionStorage) InsertTransactions(txs []*types.Transaction) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -53,6 +54,7 @@ func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target string) []t
 	return txs
 }
 
+// appendsTxHashForAddress appends tx hash list for target account
 func (s *InMemoryTransactionStorage) appendsTxHashForAddress(account string, txHash string) {
 	account = strings.ToLower(account)
 

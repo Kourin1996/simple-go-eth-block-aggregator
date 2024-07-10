@@ -71,7 +71,7 @@ func readEnvs() (*Env, error) {
 	var (
 		port            = DefaultApiPort
 		beginningHeight *big.Int
-		jsonRpcUrl      = ""
+		jsonRpcUrl      string
 	)
 
 	// API port

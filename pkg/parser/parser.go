@@ -227,7 +227,7 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 	retryTime := 0 // number of attempt
 
 	for {
-		ctx, _ := context.WithTimeout(ctx, DefaultFetchTimeout)
+		ctx, _ := context.WithTimeout(ctx, DefaultFetchTimeout) // nolint:govet
 
 		block, err := p.ethClient.GetBlockByNumber(ctx, height, true)
 		if err == nil {

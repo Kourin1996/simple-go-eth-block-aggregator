@@ -30,6 +30,10 @@ func (c *EthJsonRpcClient) GetBlockByNumber(
 		return nil, fmt.Errorf("JSON RPC server returned an error, code=%d, message=%s", res.Error.Code, res.Error.Message)
 	}
 
+	if string(res.Result) == "null" {
+		return nil, nil
+	}
+
 	block := &types.Block{}
 	if err := json.Unmarshal(res.Result, block); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal json, %s: %w", string(res.Result), err)

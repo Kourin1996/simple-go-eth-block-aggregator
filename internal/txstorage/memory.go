@@ -2,6 +2,7 @@ package txstorage
 
 import (
 	"github.com/Kourin1996/simple-go-eth-block-aggregator/internal/types"
+	"strings"
 	"sync"
 )
 
@@ -34,6 +35,8 @@ func (s *InMemoryTransactionStorage) InsertTransactions(txs []*types.Transaction
 
 // GetTransactionsByAddress returns list of transactions associated with given address
 func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target string) []types.Transaction {
+	target = strings.ToLower(target)
+
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -51,6 +54,8 @@ func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target string) []t
 }
 
 func (s *InMemoryTransactionStorage) appendsTxHashForAddress(account string, txHash string) {
+	account = strings.ToLower(account)
+
 	_, ok := s.txHashesByAddress[account]
 	if !ok {
 		s.txHashesByAddress[account] = make([]string, 0)

@@ -180,7 +180,10 @@ func (p *Parser) runStoringProcess() {
 		// filter transactions by address
 		filtered := make([]*types.Transaction, 0, len(block.Transactions))
 		for _, tx := range block.Transactions {
+			tx := tx
+
 			if p.isSubscribingTo(tx.From) || p.isSubscribingTo(tx.To) {
+				log.Printf("found a concerned transaction, hash=%s, from=%s, to=%s", tx.Hash, tx.From, tx.To)
 				filtered = append(filtered, &tx)
 			}
 		}
@@ -197,7 +200,7 @@ func (p *Parser) runStoringProcess() {
 			p.notifyErrCh <- err
 		}
 
-		log.Printf("saved transactions in block, block height=%d", p.currentBlockHeight.Load())
+		log.Printf("saved transactions of block, block height=%d", p.currentBlockHeight.Load())
 	}
 }
 
@@ -257,7 +260,7 @@ func (p *Parser) fetchBlock(height big.Int) (*types.Block, error) {
 }
 
 func (p *Parser) isSubscribingTo(address string) bool {
-	_, existing := p.addressMap.Load(address)
+	_, existing := p.addressMap.Load(strings.ToLower(address))
 
 	return existing
 }

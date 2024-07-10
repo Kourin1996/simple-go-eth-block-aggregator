@@ -8,7 +8,7 @@ import (
 
 type InMemoryTransactionStorage struct {
 	txMap             map[string]*types.Transaction
-	txHashesByAddress map[string][]string // Address -> []BlockHash
+	txHashesByAddress map[string][]string // Address -> []TransactionHash
 
 	mutex sync.RWMutex
 }

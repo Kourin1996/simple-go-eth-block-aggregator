@@ -33,7 +33,7 @@ func (s *InMemoryTransactionStorage) InsertTransactions(txs []*types.Transaction
 }
 
 // GetTransactionsByAddress returns list of transactions associated with given address
-func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target types.Address) []*types.Transaction {
+func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target types.Address) []types.Transaction {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -42,9 +42,9 @@ func (s *InMemoryTransactionStorage) GetTransactionsByAddress(target types.Addre
 		return nil
 	}
 
-	txs := make([]*types.Transaction, len(blockHashes))
+	txs := make([]types.Transaction, len(blockHashes))
 	for idx, hash := range blockHashes {
-		txs[idx] = s.txMap[hash]
+		txs[idx] = *s.txMap[hash]
 	}
 
 	return txs

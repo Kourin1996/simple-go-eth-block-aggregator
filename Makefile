@@ -27,4 +27,4 @@ help:
 	@echo "  make          - build"
 	@echo "  make build    - build"
 	@echo "  make run      - run"
-	@echo "  make help     - このヘルプを表示"
+	@echo "  make help     - display helps"
